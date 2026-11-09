@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,59 +20,142 @@ input,textarea,select{width:100%;padding:13px;border:1px solid #d8deea;border-ra
 textarea{min-height:90px;resize:vertical}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 button{border:0;border-radius:9px;padding:14px 18px;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.6;cursor:wait}
 .generate{width:100%;margin-top:22px;background:#2563eb;color:white;font-size:16px}
-.result{margin-top:20px;background:#f2f6ff;padding:18px;border-radius:10px;display:none;white-space:pre-wrap;line-height:1.6}
+.result{margin-top:20px;background:#f2f6ff;padding:18px;border-radius:10px;display:none;white-space:pre-wrap;line-height:1.6;overflow-wrap:anywhere}
 .copy{background:#e1eaff;color:#1746a0;margin-top:10px}
 footer{text-align:center;padding:25px;color:#718096;font-size:13px}
 @media(max-width:500px){.hero h1{font-size:27px}.grid{grid-template-columns:1fr}.panel{padding:18px}}
 </style>
 </head>
 <body>
-<header><div class="logo">✦ KataJual AI</div><span>EN | ID</span></header>
+
+<header>
+<div class="logo">✦ KataJual AI</div>
+<span>EN | ID</span>
+</header>
+
 <section class="hero">
 <h1>Create better product descriptions with AI.</h1>
 <p>Generate product titles, descriptions and marketing captions in seconds.</p>
 </section>
+
 <main>
 <div class="panel">
 <h2>Product information</h2>
+
 <label>Product name</label>
-<input id="product" placeholder="e.g. Running Shoes">
+<input id="product" placeholder="e.g. Running Shoes" maxlength="150">
+
 <label>Product features</label>
-<textarea id="features" placeholder="Describe the product features..."></textarea>
+<textarea id="features" placeholder="Describe the product features..." maxlength="800"></textarea>
+
 <label>Target audience</label>
-<input id="audience" placeholder="e.g. Young adults">
+<input id="audience" placeholder="e.g. Young adults" maxlength="150">
+
 <div class="grid">
-<div><label>Language</label><select id="language"><option>English</option><option>Indonesian</option></select></div>
-<div><label>Tone</label><select id="tone"><option>Persuasive</option><option>Professional</option><option>Friendly</option><option>Luxury</option></select></div>
+<div>
+<label>Language</label>
+<select id="language">
+<option>English</option>
+<option>Indonesian</option>
+</select>
 </div>
-<button class="generate" onclick="generate()">✦ Generate content</button>
+<div>
+<label>Tone</label>
+<select id="tone">
+<option>Persuasive</option>
+<option>Professional</option>
+<option>Friendly</option>
+<option>Luxury</option>
+</select>
+</div>
+</div>
+
+<button id="generateButton" class="generate" onclick="generate()">✦ Generate content</button>
+
 <div id="result" class="result"></div>
+
 <button id="copy" class="copy" style="display:none" onclick="copyResult()">Copy result</button>
 </div>
 </main>
+
 <footer>© 2026 KataJual AI. All rights reserved.</footer>
+
 <script>
-function generate(){
-const p=document.getElementById('product').value.trim();
-const f=document.getElementById('features').value.trim();
-const a=document.getElementById('audience').value.trim();
-const lang=document.getElementById('language').value;
-const tone=document.getElementById('tone').value;
-if(!p||!f){alert('Please enter the product name and features.');return;}
-let output;
-if(lang==='Indonesian'){
-output='JUDUL PRODUK\n'+p+' - Pilihan Tepat untuk '+(a||'Anda')+'\n\nDESKRIPSI PRODUK\nTemukan '+p+', produk dengan keunggulan '+f+'. Dirancang untuk memenuhi kebutuhan '+(a||'Anda')+'. Pilih produk ini dan temukan manfaatnya sendiri!\n\nCAPTION PROMOSI\nSedang mencari '+p+'? Kenali keunggulannya: '+f+'. Yuk, cek produknya sekarang!';
-}else{
-output='PRODUCT TITLE\n'+p+' - A Great Choice for '+(a||'You')+'\n\nPRODUCT DESCRIPTION\nDiscover '+p+', featuring '+f+'. Designed with '+(a||'customers')+' in mind. Explore its features and see if it is right for you!\n\nMARKETING CAPTION\nLooking for '+p+'? Discover its features: '+f+'. Explore it today!';
+async function generate() {
+  const product = document.getElementById("product").value.trim();
+  const features = document.getElementById("features").value.trim();
+  const audience = document.getElementById("audience").value.trim();
+  const language = document.getElementById("language").value;
+  const tone = document.getElementById("tone").value;
+
+  const result = document.getElementById("result");
+  const copyButton = document.getElementById("copy");
+  const generateButton = document.getElementById("generateButton");
+
+  if (!product || !features) {
+    alert("Please enter the product name and features.");
+    return;
+  }
+
+  const benefits = audience
+    ? features + "\nTarget audience: " + audience
+    : features;
+
+  result.style.display = "block";
+  copyButton.style.display = "none";
+  result.textContent = "Generating your content with AI. Please wait...";
+  generateButton.disabled = true;
+  generateButton.textContent = "Generating...";
+
+  try {
+    const response = await fetch("/api/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        product: product,
+        benefits: benefits,
+        tone: tone,
+        language: language
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "AI request failed.");
+    }
+
+    if (!data.result) {
+      throw new Error("AI returned an empty response.");
+    }
+
+    result.textContent = data.result;
+    copyButton.style.display = "inline-block";
+
+  } catch (error) {
+    result.textContent = "Sorry, something went wrong.\n\n" + error.message;
+  } finally {
+    generateButton.disabled = false;
+    generateButton.textContent = "✦ Generate content";
+  }
 }
-document.getElementById('result').textContent=output+'\n\nTone: '+tone+'\n\nDemo output - AI integration coming soon.';
-document.getElementById('result').style.display='block';
-document.getElementById('copy').style.display='inline-block';
-}
-function copyResult(){
-navigator.clipboard.writeText(document.getElementById('result').textContent).then(()=>alert('Copied!')).catch(()=>alert('Please select and copy the result manually.'));
+
+async function copyResult() {
+  const text = document.getElementById("result").textContent;
+
+  try {
+    await navigator.clipboard.writeText(text);
+    alert("Copied!");
+  } catch (error) {
+    alert("Please select and copy the result manually.");
+  }
 }
 </script>
+
 </body>
 </html>
+
