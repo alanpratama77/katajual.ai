@@ -2,6 +2,12 @@
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname === "/api/check-config") {
+  return Response.json({
+    hasGeminiKey: Boolean(env.GEMINI_API_KEY),
+    hasAssets: Boolean(env.ASSETS)
+  });
+    }
 
     if (url.pathname === "/api/generate") {
       if (request.method !== "POST") {
