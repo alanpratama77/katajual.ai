@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KataJual AI - Product Marketing Generator</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f5f7fb;color:#182238}
+header{background:#17243b;color:white;padding:20px 7%;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:23px;font-weight:bold;color:#a8d5ff}
+.hero{text-align:center;padding:48px 18px 25px}
+.hero h1{font-size:34px;margin-bottom:12px}
+.hero p{color:#64748b;line-height:1.6}
+main{max-width:720px;margin:20px auto 60px;padding:0 16px}
+.panel{background:white;padding:25px;border-radius:16px;box-shadow:0 5px 25px #17243b12}
+label{display:block;font-weight:bold;margin:16px 0 8px}
+input,textarea,select{width:100%;padding:13px;border:1px solid #d8deea;border-radius:9px;font-size:15px;background:white}
+textarea{min-height:90px;resize:vertical}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button{border:0;border-radius:9px;padding:14px 18px;font-weight:bold;cursor:pointer}
+.generate{width:100%;margin-top:22px;background:#2563eb;color:white;font-size:16px}
+.result{margin-top:20px;background:#f2f6ff;padding:18px;border-radius:10px;display:none;white-space:pre-wrap;line-height:1.6}
+.copy{background:#e1eaff;color:#1746a0;margin-top:10px}
+footer{text-align:center;padding:25px;color:#718096;font-size:13px}
+@media(max-width:500px){.hero h1{font-size:27px}.grid{grid-template-columns:1fr}.panel{padding:18px}}
+</style>
+</head>
+<body>
+<header><div class="logo">✦ KataJual AI</div><span>EN | ID</span></header>
+<section class="hero">
+<h1>Create better product descriptions with AI.</h1>
+<p>Generate product titles, descriptions and marketing captions in seconds.</p>
+</section>
+<main>
+<div class="panel">
+<h2>Product information</h2>
+<label>Product name</label>
+<input id="product" placeholder="e.g. Running Shoes">
+<label>Product features</label>
+<textarea id="features" placeholder="Describe the product features..."></textarea>
+<label>Target audience</label>
+<input id="audience" placeholder="e.g. Young adults">
+<div class="grid">
+<div><label>Language</label><select id="language"><option>English</option><option>Indonesian</option></select></div>
+<div><label>Tone</label><select id="tone"><option>Persuasive</option><option>Professional</option><option>Friendly</option><option>Luxury</option></select></div>
+</div>
+<button class="generate" onclick="generate()">✦ Generate content</button>
+<div id="result" class="result"></div>
+<button id="copy" class="copy" style="display:none" onclick="copyResult()">Copy result</button>
+</div>
+</main>
+<footer>© 2026 KataJual AI. All rights reserved.</footer>
+<script>
+function generate(){
+const p=document.getElementById('product').value.trim();
+const f=document.getElementById('features').value.trim();
+const a=document.getElementById('audience').value.trim();
+const lang=document.getElementById('language').value;
+const tone=document.getElementById('tone').value;
+if(!p||!f){alert('Please enter the product name and features.');return;}
+let output;
+if(lang==='Indonesian'){
+output='JUDUL PRODUK\n'+p+' - Pilihan Tepat untuk '+(a||'Anda')+'\n\nDESKRIPSI PRODUK\nTemukan '+p+', produk dengan keunggulan '+f+'. Dirancang untuk memenuhi kebutuhan '+(a||'Anda')+'. Pilih produk ini dan temukan manfaatnya sendiri!\n\nCAPTION PROMOSI\nSedang mencari '+p+'? Kenali keunggulannya: '+f+'. Yuk, cek produknya sekarang!';
+}else{
+output='PRODUCT TITLE\n'+p+' - A Great Choice for '+(a||'You')+'\n\nPRODUCT DESCRIPTION\nDiscover '+p+', featuring '+f+'. Designed with '+(a||'customers')+' in mind. Explore its features and see if it is right for you!\n\nMARKETING CAPTION\nLooking for '+p+'? Discover its features: '+f+'. Explore it today!';
+}
+document.getElementById('result').textContent=output+'\n\nTone: '+tone+'\n\nDemo output - AI integration coming soon.';
+document.getElementById('result').style.display='block';
+document.getElementById('copy').style.display='inline-block';
+}
+function copyResult(){
+navigator.clipboard.writeText(document.getElementById('result').textContent).then(()=>alert('Copied!')).catch(()=>alert('Please select and copy the result manually.'));
+}
+</script>
+</body>
+</html>
